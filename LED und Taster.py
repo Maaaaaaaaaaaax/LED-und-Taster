@@ -33,10 +33,6 @@ class LED:
         GPIO.output(self.pin,0)
         self.lights = False
         
-    def toggle(self):
-        self.lights = not self.lights
-        GPIO.output(self.pin, self.lights)
-        
     def is_on(self):
         return self.lights
     
@@ -57,15 +53,26 @@ taster = taster(31)
 
 try:
     while True:
-        if taster.pressed():
-            time1 = time.time()
-            #print(time1)
-            while taster.pressed():
-                time2 = time.time()
-                #print(time2)
-            if time2 - time1 <= 0.5:
-                led.toggle()
-                cur.execute("INSERT INTO LED(is_on, timestamp) VALUES(?,?)",(led.is_on(), str(datetime.now())))
+        if led.is_on():
+            if taster.pressed():
+                time1 = time.time()
+                #print(time1)
+                while taster.pressed():
+                    time2 = time.time()
+                    #print(time2)
+                if time2 - time1 <= 0.5:
+                    led.off()
+                    cur.execute("INSERT INTO LED(is_on, timestamp) VALUES(?,?)",(led.is_on(), str(datetime.now())))
+        if led.is_on() == False:
+            if taster.pressed():
+                time1 = time.time()
+                #print(time1)
+                while taster.pressed():
+                    time2 = time.time()
+                    #print(time2)
+                if time2 - time1 <= 0.5:
+                    led.on()
+                    cur.execute("INSERT INTO LED(is_on, timestamp) VALUES(?,?)",(led.is_on(), str(datetime.now())))
 except KeyboardInterrupt:
     GPIO.cleanup()
     cur.execute("SELECT * FROM LED;")
